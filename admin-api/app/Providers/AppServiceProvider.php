@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Http\Request;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -19,6 +20,11 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        // Force Laravel Request to capture Authorization header on Vercel
+        Request::macro('getAuthorizationHeader', function () {
+            return request()->header('Authorization') 
+                ?? request()->server('HTTP_AUTHORIZATION') 
+                ?? request()->server('REDIRECT_HTTP_AUTHORIZATION');
+        });
     }
 }
