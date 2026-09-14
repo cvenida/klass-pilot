@@ -1,11 +1,9 @@
 <?php
 
-// Force error logging to screen for early bootstrap failure debugging
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
+// 1. Load Composer Autoloader
+require __DIR__ . '/../vendor/autoload.php';
 
-// Ensure storage subdirectories exist in Vercel's /tmp execution environment
+// 2. Prepare writable directory paths inside Vercel's /tmp environment
 $storagePath = '/tmp/storage';
 $cachePath = '/tmp/bootstrap/cache';
 
@@ -25,9 +23,11 @@ $_ENV['APP_PACKAGES_CACHE'] = $cachePath . '/packages.php';
 $_ENV['APP_CONFIG_CACHE']   = $cachePath . '/config.php';
 $_ENV['APP_ROUTES_CACHE']   = $cachePath . '/routes.php';
 
+// 3. Bootstrap Laravel
 $app = require __DIR__ . '/../bootstrap/app.php';
 $app->useStoragePath($storagePath);
 
+// 4. Handle Routing
 $_SERVER['SCRIPT_NAME'] = '/index.php';
 $_SERVER['SCRIPT_FILENAME'] = __DIR__ . '/../public/index.php';
 
