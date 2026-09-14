@@ -131,7 +131,7 @@ onMounted(async () => {
         </v-col>
       </v-row>
       <v-row v-else>
-        <p class="text-gray-300">No recent courses</p>
+        <p class="text-gray-600">No recent courses</p>
       </v-row>
     </div>
 

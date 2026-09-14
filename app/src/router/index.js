@@ -142,6 +142,12 @@ const router = createRouter({
         },
       ],
     },
+
+    // Catch-all 404 Route
+    {
+      path: '/:pathMatch(.*)*',
+      redirect: '/',
+    },
   ],
 })
 
