@@ -46,8 +46,9 @@ export const useAuthStore = defineStore('auth', {
           throw new Error(data.message || 'Invalid credentials')
         }
 
-        await courseStore.fetchCourses();
         this.setSession(data.data.user, data.data.access_token)
+        await courseStore.fetchCourses();
+
         await router.push(data.data.user.type == USER_TYPE.TEACHER ? '/dashboard' : '/student/dashboard')
       } catch (err) {
         console.log(err)
