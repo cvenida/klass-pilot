@@ -15,6 +15,7 @@ export const useAuthStore = defineStore('auth', {
 
   getters: {
     isAuthenticated: (state) => !!state.token,
+    getToken: (state) => state.token,
     currentUser: (state) => state.user,
     authError: (state) => state.error,
     isLoading: (state) => state.loading,
