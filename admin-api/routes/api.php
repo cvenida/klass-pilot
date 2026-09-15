@@ -6,10 +6,25 @@ use App\Http\Controllers\Api\CourseController;
 use App\Http\Controllers\Api\QuestionController;
 use App\Http\Controllers\Api\UserController;
 use App\Http\Middleware\CheckValidToken;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     return 'Welcome Moji!';
+});
+
+Route::get('/run-migrations-secret-123', function () {
+    try {
+        Artisan::call('migrate', ['--force' => true]);
+        return response()->json([
+            'message' => 'Migrations executed successfully!',
+            'output'  => Artisan::output()
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'error' => $e->getMessage()
+        ], 500);
+    }
 });
 
 Route::post('login', [UserController::class, 'login']);

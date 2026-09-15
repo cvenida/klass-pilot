@@ -182,7 +182,7 @@ onMounted(async () => {
         </div>
       </v-card>
 
-      <v-row v-if="!courseStore.isLoading">
+      <v-row v-if="!courseStore.isLoading && courseStore.allCourses.length">
         <v-col
           cols="12"
           md="6"
@@ -278,10 +278,13 @@ onMounted(async () => {
           </v-card>
         </v-col>
       </v-row>
-      <v-row v-else>
+      <v-row v-else-if="courseStore.isLoading">
         <v-col v-for="x in 4" :key="x" cols="12" sm="6" xl="4">
           <v-skeleton-loader type="card" class="rounded-lg"></v-skeleton-loader>
         </v-col>
+      </v-row>
+      <v-row v-else>
+        <p class="text-center text-gray-600">No courses</p>
       </v-row>
 
       <CourseFormDialog

@@ -95,7 +95,7 @@ onMounted(async () => {
           View all <ChevronRight class="size-4 ml-1" />
         </v-btn>
       </div>
-      <v-row v-if="!courseStore.isLoading">
+      <v-row v-if="!courseStore.isLoading && courseStore.allCourses.length">
         <v-col v-for="course in getRecentCourses()" :key="course.id" cols="12" sm="6" xl="4">
           <v-card flat rounded="xl" class="cursor-pointer group bg-surface p-5 transition-shadow hover:shadow-md border border-zinc-200 dark:border-zinc-800">
             <v-container class="flex items-center p-0 gap-2">
@@ -125,10 +125,13 @@ onMounted(async () => {
           </v-card>
         </v-col>
       </v-row>
-      <v-row v-else>
+      <v-row v-else-if="courseStore.isLoading">
         <v-col v-for="x in 2" :key="x" cols="12" sm="6" xl="4">
           <v-skeleton-loader type="article" class="rounded-lg"></v-skeleton-loader>
         </v-col>
+      </v-row>
+      <v-row v-else>
+        <p class="text-gray-600">No recent courses</p>
       </v-row>
     </div>
 

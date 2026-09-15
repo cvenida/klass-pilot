@@ -3,7 +3,7 @@ import { loginUser, registerUser, logoutUser } from '@/services/authService'
 import router from '@/router'
 import { USER_TYPE } from '@/shared/constants'
 import { useCourseStore } from '@/stores/courses'
-
+import { useNotificationStore } from '@/stores/notification'
 
 export const useAuthStore = defineStore('auth', {
   state: () => ({
@@ -15,6 +15,7 @@ export const useAuthStore = defineStore('auth', {
 
   getters: {
     isAuthenticated: (state) => !!state.token,
+    getToken: (state) => state.token,
     currentUser: (state) => state.user,
     authError: (state) => state.error,
     isLoading: (state) => state.loading,
@@ -35,6 +36,7 @@ export const useAuthStore = defineStore('auth', {
 
     async login(credentials) {
       const courseStore = useCourseStore();
+      const notify = useNotificationStore();
 
       this.loading = true
       this.error = null
@@ -46,8 +48,10 @@ export const useAuthStore = defineStore('auth', {
           throw new Error(data.message || 'Invalid credentials')
         }
 
-        await courseStore.fetchCourses();
         this.setSession(data.data.user, data.data.access_token)
+        await courseStore.fetchCourses();
+        notify.success('Logged in successfully!')
+
         await router.push(data.data.user.type == USER_TYPE.TEACHER ? '/dashboard' : '/student/dashboard')
       } catch (err) {
         console.log(err)
@@ -58,6 +62,7 @@ export const useAuthStore = defineStore('auth', {
 
     
     async signup(userData) {
+      const notify = useNotificationStore();
       this.loading = true
       this.error = null
 
@@ -69,6 +74,7 @@ export const useAuthStore = defineStore('auth', {
         }
 
         this.setSession(data.data.user, data.data.access_token)
+        notify.success('Logged out successfully!')
         await router.push('/dashboard')
       } catch (error) {
         console.log(error)
@@ -77,9 +83,11 @@ export const useAuthStore = defineStore('auth', {
     },
 
     async logout() {
+      const notify = useNotificationStore();
       await logoutUser();
 
       this.clearSession()
+      notify.success('Logged out successfully!')
       await router.push('/login')
     },
   },
