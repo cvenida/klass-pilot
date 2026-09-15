@@ -1,8 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 
-export type NotificationColor = 'success' | 'error' | 'warning' | 'info'
-
 export const useNotificationStore = defineStore('notification', () => {
   const show = ref(false)
   const message = ref('')
