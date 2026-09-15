@@ -3,7 +3,7 @@ import { loginUser, registerUser, logoutUser } from '@/services/authService'
 import router from '@/router'
 import { USER_TYPE } from '@/shared/constants'
 import { useCourseStore } from '@/stores/courses'
-
+import { useNotificationStore } from '@/stores/notification'
 
 export const useAuthStore = defineStore('auth', {
   state: () => ({
@@ -36,6 +36,7 @@ export const useAuthStore = defineStore('auth', {
 
     async login(credentials) {
       const courseStore = useCourseStore();
+      const notify = useNotificationStore();
 
       this.loading = true
       this.error = null
@@ -49,6 +50,7 @@ export const useAuthStore = defineStore('auth', {
 
         this.setSession(data.data.user, data.data.access_token)
         await courseStore.fetchCourses();
+        notify.success('Logged in successfully!')
 
         await router.push(data.data.user.type == USER_TYPE.TEACHER ? '/dashboard' : '/student/dashboard')
       } catch (err) {
