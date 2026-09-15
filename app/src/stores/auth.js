@@ -62,6 +62,7 @@ export const useAuthStore = defineStore('auth', {
 
     
     async signup(userData) {
+      const notify = useNotificationStore();
       this.loading = true
       this.error = null
 
@@ -73,6 +74,7 @@ export const useAuthStore = defineStore('auth', {
         }
 
         this.setSession(data.data.user, data.data.access_token)
+        notify.success('Logged out successfully!')
         await router.push('/dashboard')
       } catch (error) {
         console.log(error)
@@ -81,9 +83,11 @@ export const useAuthStore = defineStore('auth', {
     },
 
     async logout() {
+      const notify = useNotificationStore();
       await logoutUser();
 
       this.clearSession()
+      notify.success('Logged out successfully!')
       await router.push('/login')
     },
   },

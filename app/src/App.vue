@@ -6,12 +6,11 @@
       <router-view />
     </v-main>
 
-    <!-- Global Application Snackbar -->
     <v-snackbar
       v-model="notificationStore.show"
       :color="notificationStore.color"
       :timeout="notificationStore.timeout"
-      location="top right"
+      location="bottom center"
       variant="elevated"
       elevation="4"
       rounded="lg"
