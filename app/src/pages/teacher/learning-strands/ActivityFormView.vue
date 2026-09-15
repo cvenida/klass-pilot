@@ -1,40 +1,37 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { createActivity, updateActivity } from '@/services/activityService' // Adjust import path
-import { useCourseStore } from '@/stores/courses'
+import { createActivity, updateActivity } from '@/services/activityService'
+import { useLearningStrandStore } from '@/stores/learningStrand'
 import { Plus, Trash2, ArrowLeft, Save } from 'lucide-vue-next'
 
 const route = useRoute()
 const router = useRouter()
-const courseStore = useCourseStore()
+const learningStrandStore = useLearningStrandStore()
 
 const isSaving = ref(false)
 const isEditMode = computed(() => !!route.params.activityId)
-const courseId = route.params.id
+const learningStrandId = route.params.id
 
-// Form Schema matching DB Structure
 const form = ref({
-  course_id: courseId,
+  learning_strand_id: learningStrandId,
   title: '',
   type: 'quiz', // 'quiz', 'assignment', 'exam', 'practice'
   deadline: '',
   questions: []
 })
 
-// Types matching MySQL ENUM values
 const activityTypes = ['quiz', 'assignment', 'exam', 'practice']
 const questionTypes = ['multiple_choice', 'short_answer', 'true_false']
 
-// Initialize Data
 onMounted(async () => {
-  if (!courseStore.currentCourse) {
-    await courseStore.fetchCourseById(courseId)
+  if (!learningStrandStore.currentLearningStrand) {
+    await learningStrandStore.fetchLearningStrandById(learningStrandId)
   }
 
   // Populate data if Editing an existing activity
-  if (isEditMode.value && courseStore.currentCourse?.activities) {
-    const existing = courseStore.currentCourse.activities.find(
+  if (isEditMode.value && learningStrandStore.currentLearningStrand?.activities) {
+    const existing = learningStrandStore.currentLearningStrand.activities.find(
       a => a.id == route.params.activityId
     )
     if (existing) {
@@ -43,7 +40,6 @@ onMounted(async () => {
   }
 })
 
-// Question & Option Handlers
 const addQuestion = () => {
   form.value.questions.push({
     question_text: '',
@@ -88,9 +84,17 @@ const handleSubmit = async () => {
       formattedDeadline = d.toISOString().slice(0, 19).replace('T', ' ')
     }
 
+    // Clean question option payloads depending on question type
+    const cleanedQuestions = form.value.questions.map(q => {
+      if (q.question_type !== 'multiple_choice') {
+        return { ...q, options: [] }
+      }
+      return q
+    })
+
     const payload = {
       ...form.value,
-      course_id: courseId,
+      learning_strand_id: learningStrandId,
       deadline: formattedDeadline,
       questions: cleanedQuestions
     }
@@ -101,7 +105,7 @@ const handleSubmit = async () => {
       await createActivity(payload)
     }
 
-    await courseStore.fetchCourseById(courseId)
+    await learningStrandStore.fetchLearningStrandById(learningStrandId)
     router.back()
   } catch (error) {
     console.error('Failed to save activity:', error)
@@ -130,7 +134,6 @@ const handleSubmit = async () => {
       </v-btn>
     </div>
 
-    <!-- Basic Activity Information -->
     <v-card flat class="p-6 rounded-2xl bg-surface border border-zinc-200 dark:border-zinc-800 space-y-4">
       <h2 class="text-lg font-bold text-zinc-900 dark:text-zinc-100">
         {{ isEditMode ? 'Edit Activity Details' : 'Create New Activity' }}
@@ -218,7 +221,6 @@ const handleSubmit = async () => {
               ></v-text-field>
             </div>
 
-            <!-- Options Section (Multiple Choice) -->
             <div v-if="question.question_type === 'multiple_choice'" class="pl-4 border-l-2 border-zinc-300 dark:border-zinc-700 space-y-2 pt-2">
               <div class="text-xs font-semibold text-zinc-500">Options</div>
 

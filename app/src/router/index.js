@@ -5,9 +5,9 @@ import Dashboard from '@/pages/teacher/DashboardView.vue'
 import Settings from '@/pages/SettingsView.vue'
 import StudentDashboard from '@/pages/student/DashboardView.vue'
 import StudentsView from '@/pages/teacher/StudentsView.vue'
-import CoursesView from '@/pages/teacher/courses/CoursesView.vue'
-import CourseInfoView from '@/pages/teacher/courses/CourseInfoView.vue'
-import ActivityFormView from '@/pages/teacher/courses/ActivityFormView.vue'
+import LearningStrandsView from '@/pages/teacher/learning-strands/LearningStrandView.vue'
+import LearningStrandInfoView from '@/pages/teacher/learning-strands/LearningStrandInfoView.vue'
+import ActivityFormView from '@/pages/teacher/learning-strands/ActivityFormView.vue'
 import { USER_TYPE } from '@/shared/constants'
 import { useAuthStore } from '@/stores/auth'
 
@@ -91,26 +91,26 @@ const router = createRouter({
           component: StudentsView,
           meta: { title: 'Students', description: 'Manage & track student enrollments'},
         },
-        // Courses 
+        // Learning Strands 
         {
-          path: 'courses',
-          name: 'teacher-courses',
-          component: CoursesView,
-          meta: { title: 'Courses', description: 'Manage learning programs' },
+          path: 'learning-strands',
+          name: 'teacher-learning-strands',
+          component: LearningStrandsView,
+          meta: { title: 'Learning Strands', description: 'Manage learning programs' },
         },
         {
-          path: 'courses/:id',
-          name: 'course-info',
-          component: CourseInfoView,
-          meta: { title: 'Course', description: '' }
+          path: 'learning-strands/:id',
+          name: 'learning-strand-info',
+          component: LearningStrandInfoView,
+          meta: { title: 'Learning Strand', description: '' }
         },
         {
-          path: 'courses/:id/activities/create',
+          path: 'learning-strands/:id/activities/create',
           name: 'activity-create',
           component: ActivityFormView
         },
         {
-          path: 'courses/:id/activities/:activityId/edit',
+          path: 'learning-strands/:id/activities/:activityId/edit',
           name: 'activity-edit',
           component: ActivityFormView
         }

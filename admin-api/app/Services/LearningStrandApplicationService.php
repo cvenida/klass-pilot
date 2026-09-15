@@ -2,31 +2,31 @@
 
 namespace App\Services;
 
-use App\Models\CourseApplication;
+use App\Models\LearningStrandApplication;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 
-class CourseApplicationService
+class LearningStrandApplicationService
 {
     /**
-     * Get all course applications.
+     * Get all learning strand applications.
      * 
      */
     public function index()
     {
-        $applications = CourseApplication::with(['course', 'student'])->get();
+        $applications = LearningStrandApplication::with(['learningStrand', 'student'])->get();
 
         return response()->json($applications);
     }
 
     /**
-     * Get a specific course application by ID.
+     * Get a specific learning strand application by ID.
      * 
      */
     public function show($id)
     {
-        $application = CourseApplication::with(['course', 'student'])->find($id);
+        $application = LearningStrandApplication::with(['learningStrand', 'student'])->find($id);
 
         if (!$application) {
             return response()->json([
@@ -46,8 +46,8 @@ class CourseApplicationService
     public function apply($request)
     {
         $validator = Validator::make($request->all(), [
-            'courseId' => 'required|exists:courses,id',
-            'userId'   => [
+            'learningStrandId' => 'required|exists:learning_strand,id',
+            'userId'           => [
                 'required',
                 Rule::exists('users', 'id')->where(function ($query) {
                     $query->where('type', 'student');
@@ -59,7 +59,7 @@ class CourseApplicationService
 
         $validated = $validator->validate();
 
-        $existingApplication = CourseApplication::where('course_id', $validated['courseId'])
+        $existingApplication = LearningStrandApplication::where('learning_strand_id', $validated['learningStrandId'])
             ->where('user_id', $validated['userId'])
             ->latest('created_at')
             ->first();
@@ -68,20 +68,20 @@ class CourseApplicationService
             if ($existingApplication->status === 'pending') {
                 return response()->json([
                     'status' => false,
-                    'message' => 'You already have a pending application for this course.',
+                    'message' => 'You already have a pending application for this learning strand.',
                 ], 400);
             }
 
             if ($existingApplication->reapply_eligible_at && Carbon::now()->lt($existingApplication->reapply_eligible_at)) {
                 return response()->json([
                     'status' => false,
-                    'message' => 'You are not yet eligible to reapply for this course.',
+                    'message' => 'You are not yet eligible to reapply for this learning strand.',
                 ], 422);
             }
         }
 
-        $application = CourseApplication::create([
-            'course_id'           => $validated['courseId'],
+        $application = LearningStrandApplication::create([
+            'learning_strand_id'  => $validated['learningStrandId'],
             'user_id'             => $validated['userId'],
             'status'              => 'pending',
             'reapply_eligible_at' => null,
@@ -96,7 +96,7 @@ class CourseApplicationService
      */
     public function updateStatus($request, $id)
     {
-        $application = CourseApplication::with('course')->find($id);
+        $application = LearningStrandApplication::with('learningStrand')->find($id);
 
         if (!$application) {
             return response()->json([
@@ -112,8 +112,8 @@ class CourseApplicationService
         $validated = $validator->validate();
 
         $reapplyEligibleAt = null;
-        if ($validated['status'] === 'rejected' && $application->course->reapply_cooldown_days > 0) {
-            $reapplyEligibleAt = Carbon::now()->addDays($application->course->reapply_cooldown_days);
+        if ($validated['status'] === 'rejected' && $application->learningStrand->reapply_cooldown_days > 0) {
+            $reapplyEligibleAt = Carbon::now()->addDays($application->learningStrand->reapply_cooldown_days);
         }
 
         $application->update([
@@ -130,7 +130,7 @@ class CourseApplicationService
      */
     public function destroy($id)
     {
-        $application = CourseApplication::find($id);
+        $application = LearningStrandApplication::find($id);
 
         if (!$application) {
             return response()->json([

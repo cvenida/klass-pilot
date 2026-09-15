@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import { useCourseStore } from '@/stores/courses'
+import { useLearningStrandStore } from '@/stores/learningStrand'
 import {
   CheckCircle2,
   ChevronRight,
@@ -10,33 +10,33 @@ import {
 } from 'lucide-vue-next'
 import { orderBy } from 'lodash'
 
-const courseStore = useCourseStore()
+const learningStrandStore = useLearningStrandStore()
 
 const appHeaders = [
   { title: 'Applicant', key: 'name' },
-  { title: 'Requested Course', key: 'requestedCourseId' },
+  { title: 'Requested Learning Strand', key: 'requestedLearningStrandId' },
   { title: 'Applied Date', key: 'date' },
   { title: 'Actions', key: 'actions', sortable: false, align: 'end' as const },
 ]
 
 const isAcceptDialogOpen = ref(false)
 const selectedApp = ref<any>(null)
-const assignedCourseId = ref<number | null>(null)
+const assignedLearningStrandId = ref<number | null>(null)
 
 const openAcceptModal = (app: any) => {
   selectedApp.value = app
-  assignedCourseId.value = app.requestedCourseId
+  assignedLearningStrandId.value = app.requestedLearningStrandId
   isAcceptDialogOpen.value = true
 }
 
 const applications = ref([
-  { id: 101, name: 'John Doe', email: 'john@example.com', requestedCourseId: 1, date: 'Sep 02, 2026', status: 'Pending' },
-  { id: 102, name: 'Maria Santos', email: 'maria@example.com', requestedCourseId: 3, date: 'Sep 01, 2026', status: 'Pending' },
-  { id: 103, name: 'Robert Lee', email: 'robert@example.com', requestedCourseId: 2, date: 'Aug 30, 2026', status: 'Pending' },
+  { id: 101, name: 'John Doe', email: 'john@example.com', requestedLearningStrandId: 1, date: 'Sep 02, 2026', status: 'Pending' },
+  { id: 102, name: 'Maria Santos', email: 'maria@example.com', requestedLearningStrandId: 3, date: 'Sep 01, 2026', status: 'Pending' },
+  { id: 103, name: 'Robert Lee', email: 'robert@example.com', requestedLearningStrandId: 2, date: 'Aug 30, 2026', status: 'Pending' },
 ])
 
 const confirmAccept = () => {
-  if (!selectedApp.value || !assignedCourseId.value) return
+  if (!selectedApp.value || !assignedLearningStrandId.value) return
   applications.value = applications.value.filter(a => a.id !== selectedApp.value.id)
   isAcceptDialogOpen.value = false
   selectedApp.value = null
@@ -46,27 +46,27 @@ const declineApplication = (appId: number) => {
   applications.value = applications.value.filter(a => a.id !== appId)
 }
 
-const getCourseTitle = (courseId: number) => {
-  return courseStore.allCourses.find(c => c.id === courseId)?.title || 'Unassigned'
+const getLearningStrandTitle = (learningStrandId: number) => {
+  return learningStrandStore.allLearningStrands.find(ls => ls.id === learningStrandId)?.title || 'Unassigned'
 }
 
-const getRecentCourses = () => {
-  return orderBy(courseStore.allCourses, 'updated_at', 'desc').slice(0, 4)
+const getRecentLearningStrands = () => {
+  return orderBy(learningStrandStore.allLearningStrands, 'updated_at', 'desc').slice(0, 4)
 }
 
 const activities = ref([
   {
     id: 1,
     title: 'New assignment submitted',
-    description: 'John Doe submitted Activity 2 in Laravel Advanced',
+    description: 'John Doe submitted Activity 2 in Communication Skills',
     time: '10m ago',
     icon: FileText,
     color: 'text-sky-500 bg-sky-500/10',
   },
   {
     id: 2,
-    title: 'Course application received',
-    description: 'Maria Santos requested to join Module 1',
+    title: 'Learning strand application received',
+    description: 'Maria Santos requested to join Scientific Literacy',
     time: '1h ago',
     icon: User,
     color: 'text-emerald-500 bg-emerald-500/10',
@@ -82,7 +82,7 @@ const activities = ref([
 ])
 
 onMounted(async () => {
-  if (!courseStore.allCourses.length) await courseStore.fetchCourses();
+  if (!learningStrandStore.allLearningStrands.length) await learningStrandStore.fetchLearningStrands();
 })
 </script>
 
@@ -90,30 +90,30 @@ onMounted(async () => {
   <v-container fluid class="space-y-8 p-4 my-4 sm:p-6">
     <div>
       <div class="mb-4 flex items-center justify-between p-0">
-        <h2 class="text-base font-semibold text-zinc-900 dark:text-zinc-100">Recent courses</h2>
-        <v-btn @click="$router.push('/courses')" variant="text" color="primary" class="text-none font-medium text-sm">
+        <h2 class="text-base font-semibold text-zinc-900 dark:text-zinc-100">Recent learning strands</h2>
+        <v-btn @click="$router.push('/learning-strands')" variant="text" color="primary" class="text-none font-medium text-sm">
           View all <ChevronRight class="size-4 ml-1" />
         </v-btn>
       </div>
-      <v-row v-if="!courseStore.isLoading && courseStore.allCourses.length">
-        <v-col v-for="course in getRecentCourses()" :key="course.id" cols="12" sm="6" xl="4">
+      <v-row v-if="!learningStrandStore.isLoading && learningStrandStore.allLearningStrands.length">
+        <v-col v-for="strand in getRecentLearningStrands()" :key="strand.id" cols="12" sm="6" xl="4">
           <v-card flat rounded="xl" class="cursor-pointer group bg-surface p-5 transition-shadow hover:shadow-md border border-zinc-200 dark:border-zinc-800">
             <v-container class="flex items-center p-0 gap-2">
-              <span :class="['size-2.5 rounded-full', course.color || 'bg-emerald-500']" />
-              <h3 class="font-semibold text-zinc-900 dark:text-zinc-100 group-hover:text-primary transition-colors">{{ course.title }}</h3>
+              <span :class="['size-2.5 rounded-full', strand.color || 'bg-emerald-500']" />
+              <h3 class="font-semibold text-zinc-900 dark:text-zinc-100 group-hover:text-primary transition-colors">{{ strand.title }}</h3>
             </v-container>
             <v-container class="mt-2 space-y-1.5 p-0 text-sm text-zinc-600 dark:text-zinc-400">
               <p class="flex items-center gap-2">
-                <User class="size-3.5" /> {{ course.students || 0 }} students
+                <User class="size-3.5" /> {{ strand.students || 0 }} students
               </p>
               <p class="flex items-center gap-2">
-                <Paperclip class="size-3.5" /> {{ course.activities || 0 }} activities
+                <Paperclip class="size-3.5" /> {{ strand.activities || 0 }} activities
               </p>
             </v-container>
 
             <v-container class="flex flex-wrap p-0 gap-2 mt-3">
               <v-chip 
-                v-for="tag in course.course_tags" 
+                v-for="tag in (strand.learning_strand_tags || strand.learning_strand_tags)" 
                 :key="tag"
                 size="small" 
                 variant="tonal"
@@ -125,13 +125,13 @@ onMounted(async () => {
           </v-card>
         </v-col>
       </v-row>
-      <v-row v-else-if="courseStore.isLoading">
+      <v-row v-else-if="learningStrandStore.isLoading">
         <v-col v-for="x in 2" :key="x" cols="12" sm="6" xl="4">
           <v-skeleton-loader type="article" class="rounded-lg"></v-skeleton-loader>
         </v-col>
       </v-row>
       <v-row v-else>
-        <p class="text-gray-600">No recent courses</p>
+        <p class="text-gray-600">No recent learning strands</p>
       </v-row>
     </div>
 
@@ -162,9 +162,9 @@ onMounted(async () => {
                 </div>
               </template>
 
-              <template #item.requestedCourseId="{ item }">
+              <template #item.requestedLearningStrandId="{ item }">
                 <span class="text-sm font-medium text-zinc-700 dark:text-zinc-300">
-                  {{ getCourseTitle(item.requestedCourseId) }}
+                  {{ getLearningStrandTitle(item.requestedLearningStrandId) }}
                 </span>
               </template>
 
@@ -243,11 +243,11 @@ onMounted(async () => {
           </p>
 
           <v-select
-            v-model="assignedCourseId"
-            :items="courseStore.allCourses"
+            v-model="assignedLearningStrandId"
+            :items="learningStrandStore.allLearningStrands"
             item-title="title"
             item-value="id"
-            label="Assign Course"
+            label="Assign Learning Strand"
             variant="outlined"
             density="comfortable"
             rounded="lg"

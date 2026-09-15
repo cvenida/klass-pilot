@@ -1,10 +1,10 @@
 import { defineStore } from 'pinia'
 import {
-  getCourseApplications,
-  applyForCourse,
+  getLearningStrandApplications,
+  applyForLearningStrand,
   updateApplicationStatus,
-  deleteCourseApplication,
-} from '@/services/courseService'
+  deleteLearningStrandApplication,
+} from '@/services/learningStrandService'
 
 export const useApplicationStore = defineStore('application', {
   state: () => ({
@@ -25,7 +25,7 @@ export const useApplicationStore = defineStore('application', {
       this.error = null
 
       try {
-        const { data } = await getCourseApplications()
+        const { data } = await getLearningStrandApplications()
 
         if (!data.status) {
           throw new Error(data.message || 'Failed to fetch applications')
@@ -33,11 +33,11 @@ export const useApplicationStore = defineStore('application', {
 
         this.applications = data.data.applications
       } catch (err) {
-        console.log(err)
+        console.error(err)
         this.error = err.response?.data?.message || err.message
+      } finally {
+        this.loading = false
       }
-
-      this.loading = false
     },
 
     async submitApplication(payload) {
@@ -45,7 +45,7 @@ export const useApplicationStore = defineStore('application', {
       this.error = null
 
       try {
-        const { data } = await applyForCourse(payload)
+        const { data } = await applyForLearningStrand(payload)
 
         if (!data.status) {
           throw new Error(data.message || 'Failed to submit application')
@@ -54,11 +54,12 @@ export const useApplicationStore = defineStore('application', {
         this.applications.push(data.data.application)
         return data
       } catch (err) {
-        console.log(err)
+        console.error(err)
         this.error = err.response?.data?.message || err.message
+        throw err
+      } finally {
+        this.loading = false
       }
-
-      this.loading = false
     },
 
     async changeStatus(id, status) {
@@ -79,11 +80,12 @@ export const useApplicationStore = defineStore('application', {
 
         return data
       } catch (err) {
-        console.log(err)
+        console.error(err)
         this.error = err.response?.data?.message || err.message
+        throw err
+      } finally {
+        this.loading = false
       }
-
-      this.loading = false
     },
 
     async removeApplication(id) {
@@ -91,19 +93,21 @@ export const useApplicationStore = defineStore('application', {
       this.error = null
 
       try {
-        const { data } = await deleteCourseApplication(id)
+        const { data } = await deleteLearningStrandApplication(id)
 
         if (!data.status) {
           throw new Error(data.message || 'Failed to delete application')
         }
 
         this.applications = this.applications.filter((a) => a.application_id !== id)
+        return data
       } catch (err) {
-        console.log(err)
+        console.error(err)
         this.error = err.response?.data?.message || err.message
+        throw err
+      } finally {
+        this.loading = false
       }
-
-      this.loading = false
     },
   },
 })

@@ -5,7 +5,7 @@ export const USER_TYPE = {
     TEACHER: "teacher"
 }
 
-export const COURSE_STATUS = ['active', 'inactive', 'draft']
+export const LEARNING_STRAND_STATUS = ['active', 'inactive', 'draft']
 
 export const applyTheme = (themeMode) => {
   const theme = useTheme()

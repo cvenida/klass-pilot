@@ -1,7 +1,7 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { useCourseStore } from '@/stores/courses'
+import { useLearningStrandStore } from '@/stores/learningStrand'
 import { get } from 'lodash'
 import {
   Clock,
@@ -12,29 +12,27 @@ import {
 
 const route = useRoute()
 const router = useRouter()
-const courseStore = useCourseStore()
+const learningStrandStore = useLearningStrandStore()
 
 const basePath = '/' + route.path.split('/')[1]
-
 const isLoading = ref(true)
 
-const course = computed(() => courseStore.currentCourse)
+const learningStrand = computed(() => learningStrandStore.currentLearningStrand)
+const activities = computed(() => get(learningStrand, 'value.activities', []))
 
 onMounted(async () => {
-  const courseId = route.params.id
-  if (courseId) {
+  const learningStrandId = route.params.id
+  if (learningStrandId) {
     try {
       isLoading.value = true
-      await courseStore.fetchCourseById(courseId)
+      await learningStrandStore.fetchLearningStrandById(learningStrandId)
     } catch (error) {
-      console.error('Failed to load course details:', error)
+      console.error('Failed to load learning strand details:', error)
     } finally {
       isLoading.value = false
     }
   }
 })
-
-const activities = computed(() => get(course, 'value.activities', []))
 
 const getStatusColor = (status) => {
   switch (status) {
@@ -58,12 +56,13 @@ const getStatusColor = (status) => {
         <template #prepend>
           <ArrowLeft class="size-4" />
         </template>
-        Back to Courses
+        Back to Learning Strands
       </v-btn>
 
       <v-btn
+        v-if="learningStrand?.id"
         color="primary"
-        @click="$router.push(`${basePath}/${course.id}/activities/create`)"
+        @click="router.push(`${basePath}/${learningStrand.id}/activities/create`)"
         rounded="lg"
         class="text-none font-semibold shadow-sm"
       >
@@ -75,42 +74,42 @@ const getStatusColor = (status) => {
     </div>
 
     <v-card v-if="isLoading" flat class="rounded-2xl p-6 bg-surface border border-zinc-200 dark:border-zinc-800">
-      <v-skeleton-loader type="article, chip"></v-skeleton-loader>
+      <v-skeleton-loader type="article, chip" />
     </v-card>
 
-    <v-card v-else-if="course" flat class="rounded-2xl p-6 bg-surface border border-zinc-200 dark:border-zinc-800">
+    <v-card v-else-if="learningStrand" flat class="rounded-2xl p-6 bg-surface border border-zinc-200 dark:border-zinc-800">
       <div class="flex flex-col md:flex-row md:items-start justify-between gap-6">
         <div class="space-y-3 flex-1">
           <div class="flex items-center gap-2 flex-wrap">
             <v-chip
-              v-if="course.status"
+              v-if="learningStrand.status"
               size="small"
               color="primary"
               variant="flat"
               class="font-semibold capitalize"
             >
-              {{ course.status }}
+              {{ learningStrand.status }}
             </v-chip>
             
             <span 
-              v-if="course.reapply_cooldown_days || course.cooldownDays" 
+              v-if="learningStrand.reapply_cooldown_days || learningStrand.cooldownDays" 
               class="text-xs text-zinc-500 dark:text-zinc-400 flex items-center gap-1"
             >
-              <Clock class="size-3.5" /> {{ course.reapply_cooldown_days || course.cooldownDays }} Days Cooldown
+              <Clock class="size-3.5" /> {{ learningStrand.reapply_cooldown_days || learningStrand.cooldownDays }} Days Cooldown
             </span>
           </div>
 
           <h1 class="text-2xl sm:text-3xl font-bold text-zinc-900 dark:text-zinc-100">
-            {{ course.title }}
+            {{ learningStrand.title }}
           </h1>
 
           <p class="text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed max-w-4xl">
-            {{ course.description || 'No description provided for this course.' }}
+            {{ learningStrand.description || 'No description provided for this learning strand.' }}
           </p>
 
-          <div v-if="course.tags && course.tags.length" class="flex items-center gap-2 flex-wrap pt-2">
+          <div v-if="learningStrand.tags && learningStrand.tags.length" class="flex items-center gap-2 flex-wrap pt-2">
             <v-chip
-              v-for="tag in course.tags"
+              v-for="tag in learningStrand.tags"
               :key="tag"
               size="small"
               variant="outlined"
@@ -127,17 +126,17 @@ const getStatusColor = (status) => {
     </v-card>
 
     <v-card v-else flat class="rounded-2xl p-8 bg-surface border border-zinc-200 dark:border-zinc-800 text-center">
-      <p class="text-zinc-500 dark:text-zinc-400 text-sm">Course information could not be found.</p>
+      <p class="text-zinc-500 dark:text-zinc-400 text-sm">Learning strand information could not be found.</p>
     </v-card>
 
     <div class="flex items-center justify-between pt-2">
       <div>
-        <h2 class="text-xl font-bold text-zinc-900 dark:text-zinc-100">Course Activities</h2>
-        <p class="text-xs text-zinc-500 dark:text-zinc-400">Manage and complete your tasks for this course</p>
+        <h2 class="text-xl font-bold text-zinc-900 dark:text-zinc-100">Learning Strand Activities</h2>
+        <p class="text-xs text-zinc-500 dark:text-zinc-400">Manage and complete your tasks for this learning strand</p>
       </div>
     </div>
 
-    <div class="space-y-3" v-if="!isLoading && activities.length">
+    <div v-if="!isLoading && activities.length" class="space-y-3">
       <v-card
         v-for="activity in activities"
         :key="activity.id"
@@ -166,7 +165,7 @@ const getStatusColor = (status) => {
           <div class="flex items-center justify-between sm:justify-end gap-4 border-t sm:border-t-0 pt-3 sm:pt-0 border-zinc-100 dark:border-zinc-800">
             <div class="text-right">
               <div class="text-xs text-zinc-500 dark:text-zinc-400">Score</div>
-              <div class="text-sm font-bold text-zinc-900 dark:text-zinc-100">{{ activity.score }}</div>
+              <div class="text-sm font-bold text-zinc-900 dark:text-zinc-100">{{ activity.score ?? 'N/A' }}</div>
             </div>
 
             <v-chip
@@ -190,11 +189,13 @@ const getStatusColor = (status) => {
         </div>
       </v-card>
     </div>
+
     <v-card v-else-if="!isLoading && !activities.length" flat class="rounded-2xl p-8 bg-surface border border-zinc-200 dark:border-zinc-800 text-center">
-      <p class="text-zinc-500 dark:text-zinc-400 text-sm">There is no activities for this course.</p>
+      <p class="text-zinc-500 dark:text-zinc-400 text-sm">There are no activities for this learning strand.</p>
     </v-card>
+
     <v-card v-else flat class="rounded-2xl p-6 bg-surface border border-zinc-200 dark:border-zinc-800">
-      <v-skeleton-loader type="article, chip"></v-skeleton-loader>
+      <v-skeleton-loader type="article" />
     </v-card>
   </div>
 </template>

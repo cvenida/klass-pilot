@@ -6,7 +6,7 @@ const authStore = useAuthStore()
 
 const stats = ref([
   { title: 'Total Students', value: '1,284', icon: 'mdi-school', color: 'text-teal-600', bg: 'bg-teal-50', change: '+12%', isUp: true },
-  { title: 'Active Courses', value: '42', icon: 'mdi-book-open-page-variant', color: 'text-purple-600', bg: 'bg-purple-50', change: '0%', isUp: true },
+  { title: 'Active Learning Strands', value: '42', icon: 'mdi-book-open-page-variant', color: 'text-purple-600', bg: 'bg-purple-50', change: '0%', isUp: true },
 ])
 
 const headers = [

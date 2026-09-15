@@ -1,7 +1,7 @@
 <script setup>
 import { ref, watch, computed } from 'vue'
 import { capitalize } from 'lodash'
-import { COURSE_STATUS } from '@/shared/constants'
+import { LEARNING_STRAND_STATUS } from '@/shared/constants'
 
 const props = defineProps({
   modelValue: {
@@ -46,7 +46,11 @@ watch(
           id: props.initialData.id ?? null,
           title: props.initialData.title || '',
           description: props.initialData.description || '',
-          tags: Array.isArray(props.initialData.tags) ? [...props.initialData.tags] : [],
+          tags: Array.isArray(props.initialData.learning_strand_tags) 
+            ? [...props.initialData.learning_strand_tags] 
+            : Array.isArray(props.initialData.tags) 
+              ? [...props.initialData.tags] 
+              : [],
           status: props.initialData.status || 'draft',
           cooldownDays: props.initialData.reapply_cooldown_days || 0
         }
@@ -82,13 +86,13 @@ const handleSubmit = () => {
   >
     <v-card class="rounded-2xl p-2 bg-surface border border-zinc-200 dark:border-zinc-800">
       <v-card-title class="text-lg font-bold text-zinc-900 dark:text-zinc-100 pt-4 px-4">
-        {{ isEditMode ? 'Update Course' : 'Add New Course' }}
+        {{ isEditMode ? 'Update Learning Strand' : 'Add New Learning Strand' }}
       </v-card-title>
 
       <v-card-text class="space-y-4 px-4 py-2">
         <v-text-field
           v-model="formData.title"
-          label="Course Title"
+          label="Learning Strand Title"
           variant="outlined"
           density="comfortable"
           rounded="lg"
@@ -96,7 +100,7 @@ const handleSubmit = () => {
 
         <v-textarea
           v-model="formData.description"
-          label="Course Description"
+          label="Learning Strand Description"
           variant="outlined"
           density="comfortable"
           rows="3"
@@ -106,7 +110,7 @@ const handleSubmit = () => {
         <v-select
           v-if="isEditMode"
           v-model="formData.status"
-          :items="COURSE_STATUS"
+          :items="LEARNING_STRAND_STATUS"
           label="Status"
           variant="outlined"
           density="comfortable"
@@ -127,7 +131,7 @@ const handleSubmit = () => {
           chips
           multiple
           clearable
-          label="Course Tags"
+          label="Learning Strand Tags"
           density="comfortable"
           rounded="lg"
           hint="Type a tag and press Enter to add"
@@ -168,7 +172,7 @@ const handleSubmit = () => {
           class="capitalize font-semibold"
           @click="handleSubmit"
         >
-          {{ isEditMode ? 'Save Changes' : 'Create Course' }}
+          {{ isEditMode ? 'Save Changes' : 'Create Learning Strand' }}
         </v-btn>
       </v-card-actions>
     </v-card>

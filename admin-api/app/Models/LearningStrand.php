@@ -6,19 +6,19 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class Course extends Model
+class LearningStrand extends Model
 {
     protected $fillable = [
         'title',
         'description',
         'user_id',
         'status',
-        'course_tags',
+        'learning_strand_tags',
         'reapply_cooldown_days',
     ];
 
     protected $casts = [
-        'course_tags' => 'array',
+        'learning_strand_tags' => 'array',
         'reapply_cooldown_days' => 'integer',
     ];
 
@@ -29,7 +29,7 @@ class Course extends Model
 
     public function applications(): HasMany
     {
-        return $this->hasMany(CourseApplication::class, 'course_id');
+        return $this->hasMany(LearningStrandApplication::class, 'learning_strand_id');
     }
 
     public function activities(): HasMany

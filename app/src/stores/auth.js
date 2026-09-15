@@ -2,7 +2,7 @@ import { defineStore } from 'pinia'
 import { loginUser, registerUser, logoutUser } from '@/services/authService'
 import router from '@/router'
 import { USER_TYPE } from '@/shared/constants'
-import { useCourseStore } from '@/stores/courses'
+import { useLearningStrandStore } from '@/stores/learningStrand'
 import { useNotificationStore } from '@/stores/notification'
 
 export const useAuthStore = defineStore('auth', {
@@ -35,8 +35,8 @@ export const useAuthStore = defineStore('auth', {
     },
 
     async login(credentials) {
-      const courseStore = useCourseStore();
-      const notify = useNotificationStore();
+      const learningStrandStore = useLearningStrandStore()
+      const notify = useNotificationStore()
 
       this.loading = true
       this.error = null
@@ -49,7 +49,7 @@ export const useAuthStore = defineStore('auth', {
         }
 
         this.setSession(data.data.user, data.data.access_token)
-        await courseStore.fetchCourses();
+        await learningStrandStore.fetchLearningStrands()
         notify.success('Logged in successfully!')
 
         await router.push(data.data.user.type == USER_TYPE.TEACHER ? '/dashboard' : '/student/dashboard')
@@ -60,22 +60,16 @@ export const useAuthStore = defineStore('auth', {
       this.loading = false
     },
 
-    
     async signup(userData) {
-      const notify = useNotificationStore();
+      const notify = useNotificationStore()
       this.loading = true
       this.error = null
 
       try {
-        const { data } = await registerUser(userData)
+        await registerUser(userData)
 
-        if (!response.ok) {
-          throw new Error('Failed to create account')
-        }
-
-        this.setSession(data.data.user, data.data.access_token)
-        notify.success('Logged out successfully!')
-        await router.push('/dashboard')
+        notify.success('Registered successfully! Please login')
+        await router.push('/login')
       } catch (error) {
         console.log(error)
       }
@@ -83,8 +77,8 @@ export const useAuthStore = defineStore('auth', {
     },
 
     async logout() {
-      const notify = useNotificationStore();
-      await logoutUser();
+      const notify = useNotificationStore()
+      await logoutUser()
 
       this.clearSession()
       notify.success('Logged out successfully!')

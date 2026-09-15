@@ -2,46 +2,44 @@
 
 namespace App\Services;
 
-use App\Models\Course;
-use App\Models\CourseApplication;
+use App\Models\LearningStrand;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\Rule;
 
-class CourseService
+class LearningStrandService
 {
     /**
-     * Get all course by user logged in.
+     * Get all learning strands by logged-in user.
      * 
      */
     public function index()
     {
         $user = auth()->user();
-        $courses = Course::where('user_id', $user->id)->get();
+        $learningStrands = LearningStrand::where('user_id', $user->id)->get();
 
-        return response()->json($courses);
+        return response()->json($learningStrands);
     }
 
     /**
-     * Get a specific course.
+     * Get a specific learning strand.
      * 
      */
     public function show($id)
     {
-        $course = Course::with(['activities.questions.options'])->find($id);
+        $learningStrand = LearningStrand::with(['activities.questions.options'])->find($id);
 
-        if (!$course) {
+        if (!$learningStrand) {
             return response()->json([
                 'status' => false,
-                'message' => 'Course not found.',
+                'message' => 'Learning Strand not found.',
                 'code' => 404,
             ], 404);
         }
 
-        return response()->json($course);
+        return response()->json($learningStrand);
     }
     
     /**
-     * Handle course creation.
+     * Handle learning strand creation.
      * 
      */
     public function store($request)
@@ -50,14 +48,14 @@ class CourseService
 
         if ($user->type !== 'teacher') {
             return response()->json([
-                'message' => 'Unauthorized. Only teachers can create courses.'
+                'message' => 'Unauthorized. Only teachers can create learning strands.'
             ], 403);
         }
 
         $validator = Validator::make($request->all(), [
-            'title'                 => 'required|string',
-            'description'           => 'nullable|string',
-            'tags'                  => 'nullable|array',
+            'title'        => 'required|string',
+            'description'  => 'nullable|string',
+            'tags'         => 'nullable|array',
             'cooldownDays' => 'nullable|integer',
         ], [
             'userId.exists' => 'The selected user must be a valid user with teacher type.',
@@ -65,19 +63,19 @@ class CourseService
 
         $validated = $validator->validate();
 
-        $course = Course::create([
+        $learningStrand = LearningStrand::create([
             'title'                 => $validated['title'],
             'description'           => $validated['description'] ?? null,
             'user_id'               => $user->id,
-            'course_tags'           => $validated['tags'] ?? null,
+            'learning_strand_tags'  => $validated['tags'] ?? null,
             'reapply_cooldown_days' => $validated['cooldownDays'] ?? 0,
         ]);
 
-        return response()->json($course);
+        return response()->json($learningStrand);
     }
 
     /**
-     * Handle course update.
+     * Handle learning strand update.
      */
     public function update($request, $id)
     {
@@ -85,22 +83,22 @@ class CourseService
 
         if ($user->type !== 'teacher') {
             return response()->json([
-                'message' => 'Unauthorized. Only teachers can update courses.'
+                'message' => 'Unauthorized. Only teachers can update learning strands.'
             ], 403);
         }
 
-        $course = Course::find($id);
+        $learningStrand = LearningStrand::find($id);
 
-        if (!$course) {
+        if (!$learningStrand) {
             return response()->json([
                 'status' => false,
-                'message' => 'Course not found.',
+                'message' => 'Learning Strand not found.',
             ], 404);
         }
 
-        if ($course->user_id !== $user->id) {
+        if ($learningStrand->user_id !== $user->id) {
             return response()->json([
-                'message' => 'Forbidden. You do not have permission to update this course.'
+                'message' => 'Forbidden. You do not have permission to update this learning strand.'
             ], 403);
         }
 
@@ -114,25 +112,25 @@ class CourseService
 
         $validated = $validator->validate();
 
-        $course->update([
-            'title'=> $validated['title'] ?? $course->title,
-            'description'=> array_key_exists('description', $validated) 
+        $learningStrand->update([
+            'title' => $validated['title'] ?? $learningStrand->title,
+            'description' => array_key_exists('description', $validated) 
                 ? $validated['description'] 
-                : $course->description,
-            'course_tags'=> array_key_exists('tags', $validated) 
+                : $learningStrand->description,
+            'learning_strand_tags' => array_key_exists('tags', $validated) 
                 ? $validated['tags'] 
-                : $course->course_tags,
+                : $learningStrand->learning_strand_tags,
             'reapply_cooldown_days' => array_key_exists('cooldownDays', $validated) 
                 ? $validated['cooldownDays'] 
-                : $course->reapply_cooldown_days,
-            'status'=> $validated['status'] ?? $course->status,
+                : $learningStrand->reapply_cooldown_days,
+            'status' => $validated['status'] ?? $learningStrand->status,
         ]);
 
-        return response()->json($course);
+        return response()->json($learningStrand);
     }
 
     /**
-     * Handle course deletion.
+     * Handle learning strand deletion.
      * 
      */
     public function destroy($id)
@@ -141,30 +139,30 @@ class CourseService
 
         if ($user->type !== 'teacher') {
             return response()->json([
-                'message' => 'Unauthorized. Only teachers can update courses.'
+                'message' => 'Unauthorized. Only teachers can delete learning strands.'
             ], 403);
         }
         
-        $course = Course::find($id);
+        $learningStrand = LearningStrand::find($id);
 
-        if ($course->user_id !== $user->id) {
-            return response()->json([
-                'message' => 'Forbidden. You do not have permission to update this course.'
-            ], 403);
-        }
-
-        if (!$course) {
+        if (!$learningStrand) {
             return response()->json([
                 'status' => false,
-                'message' => 'Course not found.',
+                'message' => 'Learning Strand not found.',
             ], 404);
         }
 
-        $course->delete();
+        if ($learningStrand->user_id !== $user->id) {
+            return response()->json([
+                'message' => 'Forbidden. You do not have permission to delete this learning strand.'
+            ], 403);
+        }
+
+        $learningStrand->delete();
 
         return response()->json([
             'status' => true,
-            'message' => 'Course deleted successfully.',
+            'message' => 'Learning Strand deleted successfully.',
         ]);
     }
 }

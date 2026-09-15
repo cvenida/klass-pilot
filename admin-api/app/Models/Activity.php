@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class Activity extends Model
 {
     protected $fillable = [
-        'course_id',
+        'learning_strand_id',
         'title',
         'type',
         'deadline',
@@ -19,9 +19,9 @@ class Activity extends Model
         'deadline' => 'datetime',
     ];
 
-    public function course(): BelongsTo
+    public function learningStrand(): BelongsTo
     {
-        return $this->belongsTo(Course::class);
+        return $this->belongsTo(LearningStrand::class);
     }
 
     public function questions(): HasMany

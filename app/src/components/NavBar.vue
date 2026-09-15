@@ -21,7 +21,7 @@ const { mobile } = useDisplay()
 
 const navItems = [
   { icon: LayoutDashboard, label: 'Dashboard', to: '/dashboard', teacherOnly: false },
-  { icon: BookOpen, label: 'Courses', to: '/courses', teacherOnly: false },
+  { icon: BookOpen, label: 'Learning Strands', to: '/learning-strands', teacherOnly: false },
   { icon: GraduationCap, label: 'Students', to: '/students', teacherOnly: true },
 ]
 

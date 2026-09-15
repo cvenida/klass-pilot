@@ -1,8 +1,8 @@
 <?php
 
 use App\Http\Controllers\Api\ActivityController;
-use App\Http\Controllers\Api\CourseApplicationController;
-use App\Http\Controllers\Api\CourseController;
+use App\Http\Controllers\Api\LearningStrandApplicationController;
+use App\Http\Controllers\Api\LearningStrandController;
 use App\Http\Controllers\Api\QuestionController;
 use App\Http\Controllers\Api\UserController;
 use App\Http\Middleware\CheckValidToken;
@@ -33,10 +33,10 @@ Route::post('register', [UserController::class, 'register']);
 Route::middleware(CheckValidToken::class)->group(function () {
     Route::post('logout', [UserController::class, 'logout']);
 
-    Route::resource('courses', CourseController::class)->only(['store', 'show', 'index', 'update', 'destroy']);
+    Route::resource('learning-strands', LearningStrandController::class)->only(['store', 'show', 'index', 'update', 'destroy']);
     Route::resource('activities', ActivityController::class)->only(['store', 'show', 'index', 'update', 'destroy']);
     Route::resource('questions', QuestionController::class)->only(['store', 'show', 'index', 'update', 'destroy']);
 
-    Route::resource('course-applications', CourseApplicationController::class)->only(['store', 'show', 'index', 'destroy']);
-    Route::put('course-applications/{id}/status', [CourseApplicationController::class, 'updateStatus']);
+    Route::resource('learning-strand-applications', LearningStrandApplicationController::class)->only(['store', 'show', 'index', 'destroy']);
+    Route::put('learning-strand-applications/{id}/status', [LearningStrandApplicationController::class, 'updateStatus']);
 });

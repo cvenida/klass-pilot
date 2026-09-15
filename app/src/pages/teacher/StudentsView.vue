@@ -3,41 +3,41 @@ import { ref } from 'vue'
 
 const currentTab = ref('applications')
 
-const courses = ref([
+const learningStrands = ref([
   { id: 1, title: 'Basic Literacy Program (BLP)' },
   { id: 2, title: 'Elementary Accreditation & Equivalency (A&E)' },
   { id: 3, title: 'Secondary Accreditation & Equivalency (A&E)' },
 ])
 
 const applications = ref([
-  { id: 101, name: 'John Doe', email: 'john@example.com', requestedCourseId: 1, date: 'Sep 02, 2026', status: 'Pending' },
-  { id: 102, name: 'Maria Santos', email: 'maria@example.com', requestedCourseId: 3, date: 'Sep 01, 2026', status: 'Pending' },
-  { id: 103, name: 'Robert Lee', email: 'robert@example.com', requestedCourseId: 2, date: 'Aug 30, 2026', status: 'Pending' },
+  { id: 101, name: 'John Doe', email: 'john@example.com', requestedLearningStrandId: 1, date: 'Sep 02, 2026', status: 'Pending' },
+  { id: 102, name: 'Maria Santos', email: 'maria@example.com', requestedLearningStrandId: 3, date: 'Sep 01, 2026', status: 'Pending' },
+  { id: 103, name: 'Robert Lee', email: 'robert@example.com', requestedLearningStrandId: 2, date: 'Aug 30, 2026', status: 'Pending' },
 ])
 
 const enrolledStudents = ref([
-  { id: 1, name: 'Alex Johnson', email: 'alex@example.com', courseId: 1, joined: 'Sep 01, 2026' },
-  { id: 2, name: 'Michael Brown', email: 'm.brown@example.com', courseId: 2, joined: 'Aug 25, 2026' },
+  { id: 1, name: 'Alex Johnson', email: 'alex@example.com', learningStrandId: 1, joined: 'Sep 01, 2026' },
+  { id: 2, name: 'Michael Brown', email: 'm.brown@example.com', learningStrandId: 2, joined: 'Aug 25, 2026' },
 ])
 
 const isAcceptDialogOpen = ref(false)
 const selectedApp = ref<any>(null)
-const assignedCourseId = ref<number | null>(null)
+const assignedLearningStrandId = ref<number | null>(null)
 
 const openAcceptModal = (app: any) => {
   selectedApp.value = app
-  assignedCourseId.value = app.requestedCourseId
+  assignedLearningStrandId.value = app.requestedLearningStrandId
   isAcceptDialogOpen.value = true
 }
 
 const confirmAccept = () => {
-  if (!selectedApp.value || !assignedCourseId.value) return
+  if (!selectedApp.value || !assignedLearningStrandId.value) return
 
   enrolledStudents.value.unshift({
     id: selectedApp.value.id,
     name: selectedApp.value.name,
     email: selectedApp.value.email,
-    courseId: assignedCourseId.value,
+    learningStrandId: assignedLearningStrandId.value,
     joined: new Date().toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' })
   })
 
@@ -50,20 +50,20 @@ const declineApplication = (appId: number) => {
   applications.value = applications.value.filter(a => a.id !== appId)
 }
 
-const getCourseTitle = (courseId: number) => {
-  return courses.value.find(c => c.id === courseId)?.title || 'Unassigned'
+const getLearningStrandTitle = (strandId: number) => {
+  return learningStrands.value.find(s => s.id === strandId)?.title || 'Unassigned'
 }
 
 const appHeaders = [
   { title: 'Applicant', key: 'name' },
-  { title: 'Requested Course', key: 'requestedCourseId' },
+  { title: 'Requested Learning Strand', key: 'requestedLearningStrandId' },
   { title: 'Applied Date', key: 'date' },
   { title: 'Actions', key: 'actions', sortable: false, align: 'end' as const },
 ]
 
 const enrolledHeaders = [
   { title: 'Student', key: 'name' },
-  { title: 'Enrolled Course', key: 'courseId' },
+  { title: 'Enrolled Learning Strand', key: 'learningStrandId' },
   { title: 'Enrolled Date', key: 'joined' },
 ]
 </script>
@@ -101,9 +101,9 @@ const enrolledHeaders = [
               </div>
             </template>
 
-            <template #item.requestedCourseId="{ item }">
+            <template #item.requestedLearningStrandId="{ item }">
               <span class="text-sm font-medium text-zinc-700 dark:text-zinc-300">
-                {{ getCourseTitle(item.requestedCourseId) }}
+                {{ getLearningStrandTitle(item.requestedLearningStrandId) }}
               </span>
             </template>
 
@@ -149,9 +149,9 @@ const enrolledHeaders = [
               </div>
             </template>
 
-            <template #item.courseId="{ item }">
+            <template #item.learningStrandId="{ item }">
               <span class="text-sm font-medium text-zinc-700 dark:text-zinc-300">
-                {{ getCourseTitle(item.courseId) }}
+                {{ getLearningStrandTitle(item.learningStrandId) }}
               </span>
             </template>
           </v-data-table>
@@ -171,11 +171,11 @@ const enrolledHeaders = [
           </p>
 
           <v-select
-            v-model="assignedCourseId"
-            :items="courses"
+            v-model="assignedLearningStrandId"
+            :items="learningStrands"
             item-title="title"
             item-value="id"
-            label="Assign Course"
+            label="Assign Learning Strand"
             variant="outlined"
             density="comfortable"
             rounded="lg"

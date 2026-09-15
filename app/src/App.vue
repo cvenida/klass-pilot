@@ -44,7 +44,7 @@ const authStore = useAuthStore()
 const notificationStore = useNotificationStore()
 const route = useRoute()
 
-const excludedRoutes = ['/login', '/register', '/settings']
+const excludedRoutes = ['/login', '/register']
 
 const iconMap = {
   success: 'mdi-check-circle',

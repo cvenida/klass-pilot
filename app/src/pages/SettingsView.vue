@@ -41,16 +41,14 @@ const accountForm = ref({
       if (authStore.currentUser) authStore.currentUser.email = val
     }
   }),
-  role: computed(() => authStore.currentUser?.role || authStore.currentUser?.type),
-  bio: ref(authStore.currentUser?.bio || '')
+  role: computed(() => authStore.currentUser?.role || authStore.currentUser?.type)
 })
 
-// Form State
 const settings = ref({
   account: accountForm,
   notifications: {
     emailDigest: true,
-    courseSubmissions: true,
+    learningStrandSubmissions: true,
     systemUpdates: false,
     marketingEmails: false
   },
@@ -64,7 +62,6 @@ const settings = ref({
   }
 })
 
-// Theme handling engine
 const applyTheme = (themeMode) => {
   let isDark = false
 
@@ -74,21 +71,17 @@ const applyTheme = (themeMode) => {
     isDark = themeMode === 'dark'
   }
 
-  // 1. Update Vuetify Theme
   theme.global.name.value = isDark ? 'dark' : 'light'
 
-  // 2. Update Tailwind CSS Root Class
   if (isDark) {
     document.documentElement.classList.add('dark')
   } else {
     document.documentElement.classList.remove('dark')
   }
 
-  // 3. Persist setting in localStorage
   localStorage.setItem('user-theme', themeMode)
 }
 
-// Watch for theme UI changes
 watch(
   () => settings.value.appearance.theme,
   (newTheme) => {
@@ -96,7 +89,6 @@ watch(
   }
 )
 
-// Initialize theme state & sync OS changes
 onMounted(() => {
   const savedTheme = localStorage.getItem('user-theme') || 'system'
   settings.value.appearance.theme = savedTheme
@@ -148,7 +140,6 @@ const handleLogout = () => {
         </v-btn>
       </div>
 
-      <!-- Success Alert -->
       <v-slide-y-transition>
         <div
           v-if="showSuccessAlert"
@@ -163,9 +154,7 @@ const handleLogout = () => {
         </div>
       </v-slide-y-transition>
 
-      <!-- Single Unified Card -->
       <v-card flat class="p-6 border border-neutral-300 dark:border-neutral-700 rounded-2xl bg-white dark:bg-neutral-900 space-y-8">
-        <!-- 1. ACCOUNT SETTINGS -->
         <div class="space-y-6">
           <div class="flex items-center gap-2">
             <User class="size-5 text-primary shrink-0" />
@@ -210,19 +199,8 @@ const handleLogout = () => {
             hint="Roles are managed by system administrators."
             persistent-hint
           />
-
-          <v-textarea
-            v-model="settings.account.bio"
-            label="Bio"
-            variant="outlined"
-            density="comfortable"
-            rows="3"
-            rounded="lg"
-            hide-details
-          />
         </div>
 
-        <!-- 2. SECURITY SETTINGS -->
         <div class="space-y-6">
           <div class="flex items-center gap-2">
             <ShieldCheck class="size-5 text-primary shrink-0" />
@@ -259,7 +237,6 @@ const handleLogout = () => {
           </div>
         </div>
 
-        <!-- 3. APPEARANCE SETTINGS -->
         <section class="space-y-6">
           <div class="flex items-center gap-2">
             <Palette class="size-5 text-primary shrink-0" />
