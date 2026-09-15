@@ -6,6 +6,20 @@ export const USER_TYPE = {
 }
 
 export const LEARNING_STRAND_STATUS = ['active', 'inactive', 'draft']
+export const QUESTION_TYPE = [
+  {
+    id: 'multiple_choice',
+    name: 'Multiple Choice'
+  },
+  {
+    id: 'true_false',
+    name: 'True or False'
+  },
+  {
+    id: 'short_answer',
+    name: 'Short Answer'
+  }
+]
 
 export const applyTheme = (themeMode) => {
   const theme = useTheme()

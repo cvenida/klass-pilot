@@ -52,7 +52,7 @@ watch(
               ? [...props.initialData.tags] 
               : [],
           status: props.initialData.status || 'draft',
-          cooldownDays: props.initialData.reapply_cooldown_days || 0
+          cooldownDays: props.initialData.cooldownDays || 0
         }
       } else {
         formData.value = {

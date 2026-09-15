@@ -9,6 +9,7 @@ import { useRoute } from 'vue-router'
 
 const route = useRoute()
 const basePath = '/' + route.path.split('/')[1]
+const isLoading = ref(false);
 
 const learningStrandStore = useLearningStrandStore()
 
@@ -38,12 +39,14 @@ const openEditDialog = (strand) => {
     description: strand.description || '',
     tags: Array.isArray(strand.learning_strand_tags) ? [...strand.learning_strand_tags] : [],
     status: strand.status || 'draft',
-    cooldownDays: strand.reapply_cooldown_days || 0
+    cooldownDays: strand.reapply_cooldown_days
   }
   isDialogOpen.value = true
 }
 
 const handleFormSubmit = async (data) => {
+  isLoading.value = true;
+  
   if (data.id) {
     await learningStrandStore.editLearningStrand(data.id, {
       title: data.title,
@@ -63,6 +66,7 @@ const handleFormSubmit = async (data) => {
 
   selectedLearningStrandData.value = null
   isDialogOpen.value = false
+  isLoading.value = false;
 }
 
 const isDeleteDialogOpen = ref(false)
@@ -289,7 +293,7 @@ onMounted(async () => {
       <LearningStrandFormDialog
         v-model="isDialogOpen"
         :initial-data="selectedLearningStrandData"
-        :is-loading="learningStrandStore.isLoading"
+        :is-loading="isLoading"
         @submit="handleFormSubmit"
       />
 

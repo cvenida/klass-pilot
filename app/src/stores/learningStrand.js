@@ -32,7 +32,6 @@ export const useLearningStrandStore = defineStore('learningStrand', {
 
         this.learningStrands = data
       } catch (err) {
-        console.log(err)
         this.error = err.response?.data?.message || err.message
       }
 
@@ -56,7 +55,6 @@ export const useLearningStrandStore = defineStore('learningStrand', {
     },
 
     async addLearningStrand(payload) {
-      this.loading = true
       this.error = null
 
       try {
@@ -67,12 +65,9 @@ export const useLearningStrandStore = defineStore('learningStrand', {
         console.log(err)
         this.error = err.response?.data?.message || err.message
       }
-
-      this.loading = false
     },
 
     async editLearningStrand(id, payload) {
-      this.loading = true
       this.error = null
 
       try {
@@ -90,8 +85,6 @@ export const useLearningStrandStore = defineStore('learningStrand', {
         console.log(err)
         this.error = err.response?.data?.message || err.message
       }
-
-      this.loading = false
     },
 
     async removeLearningStrand(id) {

@@ -4,6 +4,8 @@ import { useRoute, useRouter } from 'vue-router'
 import { createActivity, updateActivity } from '@/services/activityService'
 import { useLearningStrandStore } from '@/stores/learningStrand'
 import { Plus, Trash2, ArrowLeft, Save } from 'lucide-vue-next'
+import { QUESTION_TYPE } from '@/shared/constants'
+import { capitalize } from 'lodash'
 
 const route = useRoute()
 const router = useRouter()
@@ -13,18 +15,33 @@ const isSaving = ref(false)
 const isEditMode = computed(() => !!route.params.activityId)
 const learningStrandId = route.params.id
 
+// Deadline menu state
+const deadlineMenu = ref(false)
+
 const form = ref({
   learning_strand_id: learningStrandId,
   title: '',
   type: 'quiz', // 'quiz', 'assignment', 'exam', 'practice'
-  deadline: '',
+  deadlineDate: null,
+  deadlineTime: '23:59',
   questions: []
 })
 
 const activityTypes = ['quiz', 'assignment', 'exam', 'practice']
-const questionTypes = ['multiple_choice', 'short_answer', 'true_false']
+
+// Combined deadline computed property for display & submission
+const formattedDeadlineDisplay = computed(() => {
+  if (!form.value.deadlineDate) return ''
+  const d = new Date(form.value.deadlineDate)
+  const dateStr = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+  return `${dateStr} ${form.value.deadlineTime}`
+})
 
 onMounted(async () => {
+  if (!isEditMode.value) {
+    addQuestion();
+  }
+  
   if (!learningStrandStore.currentLearningStrand) {
     await learningStrandStore.fetchLearningStrandById(learningStrandId)
   }
@@ -35,7 +52,16 @@ onMounted(async () => {
       a => a.id == route.params.activityId
     )
     if (existing) {
-      form.value = JSON.parse(JSON.stringify(existing))
+      const data = JSON.parse(JSON.stringify(existing))
+      if (data.deadline) {
+        const d = new Date(data.deadline)
+        data.deadlineDate = d
+        data.deadlineTime = d.toTimeString().slice(0, 5)
+      } else {
+        data.deadlineDate = null
+        data.deadlineTime = '23:59'
+      }
+      form.value = data
     }
   }
 })
@@ -73,27 +99,47 @@ const setCorrectOption = (qIndex, oIndex) => {
   })
 }
 
-// Submit Form
+const handleTypeChange = (question) => {
+  if (question.question_type === 'true_false') {
+    question.options = [
+      { option_text: 'True', is_correct: 1 },
+      { option_text: 'False', is_correct: 0 }
+    ]
+  } else if (question.question_type === 'short_answer') {
+    question.options = []
+  } else if (question.question_type === 'multiple_choice' && (!question.options || question.options.length === 0)) {
+    question.options = [
+      { option_text: '', is_correct: 1 },
+      { option_text: '', is_correct: 0 }
+    ]
+  }
+}
+
 const handleSubmit = async () => {
   try {
     isSaving.value = true
 
     let formattedDeadline = null
-    if (form.value.deadline) {
-      const d = new Date(form.value.deadline)
-      formattedDeadline = d.toISOString().slice(0, 19).replace('T', ' ')
+    if (form.value.deadlineDate) {
+      const d = new Date(form.value.deadlineDate)
+      const year = d.getFullYear()
+      const month = String(d.getMonth() + 1).padStart(2, '0')
+      const day = String(d.getDate()).padStart(2, '0')
+      const time = form.value.deadlineTime || '23:59'
+      formattedDeadline = `${year}-${month}-${day} ${time}:00`
     }
 
-    // Clean question option payloads depending on question type
     const cleanedQuestions = form.value.questions.map(q => {
-      if (q.question_type !== 'multiple_choice') {
+      if (q.question_type === 'short_answer') {
         return { ...q, options: [] }
       }
       return q
     })
 
+    const { deadlineDate, deadlineTime, ...formData } = form.value
+
     const payload = {
-      ...form.value,
+      ...formData,
       learning_strand_id: learningStrandId,
       deadline: formattedDeadline,
       questions: cleanedQuestions
@@ -156,16 +202,53 @@ const handleSubmit = async () => {
           density="compact"
           class="capitalize"
           hide-details
-        ></v-select>
+        >
+          <template #item="{ item, props }">
+            <v-list-item v-bind="item">
+              {{ capitalize(item) }}
+            </v-list-item>
+          </template>
+        </v-select>
 
-        <v-date-input
-          v-model="form.deadline"
-          label="Deadline"
-          variant="outlined"
-          density="compact"
-          hide-details
-          clearable
-        ></v-date-input>
+        <v-menu v-model="deadlineMenu" :close-on-content-click="false" location="bottom end">
+          <template #activator="{ props }">
+            <v-text-field
+              v-bind="props"
+              :model-value="formattedDeadlineDisplay"
+              label="Deadline"
+              variant="outlined"
+              density="compact"
+              readonly
+              hide-details
+              clearable
+              @click:clear="form.deadlineDate = null"
+            ></v-text-field>
+          </template>
+
+          <v-card class="p-4 rounded-2xl border border-zinc-200 dark:border-zinc-800 space-y-4 max-w-sm">
+            <div class="text-sm font-semibold text-zinc-900 dark:text-zinc-100">Select Date & Time</div>
+            
+            <v-date-picker
+              v-model="form.deadlineDate"
+              hide-header
+              density="compact"
+            ></v-date-picker>
+
+            <v-text-field
+              v-model="form.deadlineTime"
+              label="Time"
+              type="time"
+              variant="outlined"
+              density="compact"
+              hide-details
+            ></v-text-field>
+
+            <div class="flex justify-end gap-2 pt-2">
+              <v-btn size="small" variant="text" rounded="lg" @click="deadlineMenu = false">Close</v-btn>
+              <v-btn size="small" color="primary" rounded="lg" @click="deadlineMenu = false">Set Deadline</v-btn>
+            </div>
+          </v-card>
+        </v-menu>
       </div>
     </v-card>
 
@@ -204,11 +287,14 @@ const handleSubmit = async () => {
 
               <v-select
                 v-model="question.question_type"
-                :items="questionTypes"
+                :items="QUESTION_TYPE"
+                item-title="name"
+                item-value="id"
                 label="Type"
                 variant="outlined"
                 density="compact"
                 hide-details
+                @update:model-value="handleTypeChange(question)"
               ></v-select>
 
               <v-text-field
@@ -221,7 +307,7 @@ const handleSubmit = async () => {
               ></v-text-field>
             </div>
 
-            <div v-if="question.question_type === 'multiple_choice'" class="pl-4 border-l-2 border-zinc-300 dark:border-zinc-700 space-y-2 pt-2">
+            <v-container v-if="question.question_type === 'multiple_choice'" class="pl-4 border-l-2 border-zinc-300 dark:border-zinc-700 space-y-2 pt-2">
               <div class="text-xs font-semibold text-zinc-500">Options</div>
 
               <div
@@ -261,7 +347,30 @@ const handleSubmit = async () => {
               <v-btn variant="text" size="x-small" color="primary" @click="addOption(qIndex)">
                 + Add Option
               </v-btn>
-            </div>
+            </v-container>
+
+            <v-container v-else-if="question.question_type === 'true_false'" class="pl-4 border-l-2 border-zinc-300 dark:border-zinc-700 space-y-2 pt-2">
+              <div class="text-xs font-semibold text-zinc-500">Select Correct Answer</div>
+              <div class="flex gap-4">
+                <v-btn
+                  v-for="(option, oIndex) in question.options"
+                  :key="oIndex"
+                  :color="option.is_correct ? 'success' : 'default'"
+                  :variant="option.is_correct ? 'flat' : 'outlined'"
+                  size="small"
+                  rounded="lg"
+                  @click="setCorrectOption(qIndex, oIndex)"
+                >
+                  {{ option.option_text }}
+                </v-btn>
+              </div>
+            </v-container>
+
+            <v-container v-else-if="question.question_type === 'short_answer'" class="pl-4 border-l-2 border-zinc-300 dark:border-zinc-700 pt-2">
+              <p class="text-xs text-zinc-500 italic">
+                Students will enter a free-text response. Manual grading may be required.
+              </p>
+            </v-container>
           </div>
         </v-card>
       </div>

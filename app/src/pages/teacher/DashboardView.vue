@@ -97,7 +97,7 @@ onMounted(async () => {
       </div>
       <v-row v-if="!learningStrandStore.isLoading && learningStrandStore.allLearningStrands.length">
         <v-col v-for="strand in getRecentLearningStrands()" :key="strand.id" cols="12" sm="6" xl="4">
-          <v-card flat rounded="xl" class="cursor-pointer group bg-surface p-5 transition-shadow hover:shadow-md border border-zinc-200 dark:border-zinc-800">
+          <v-card @click="$router.push(`/learning-strands/${strand.id}`)" flat rounded="xl" class="cursor-pointer group bg-surface p-5 transition-shadow hover:shadow-md border border-zinc-200 dark:border-zinc-800">
             <v-container class="flex items-center p-0 gap-2">
               <span :class="['size-2.5 rounded-full', strand.color || 'bg-emerald-500']" />
               <h3 class="font-semibold text-zinc-900 dark:text-zinc-100 group-hover:text-primary transition-colors">{{ strand.title }}</h3>

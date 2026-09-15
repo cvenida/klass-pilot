@@ -44,16 +44,31 @@ axios.interceptors.response.use(
       response.data?.message === 'Token has expired.'
     ) {
       const authStore = useAuthStore()
-      authStore.logout()
-      return Promise.reject(new Error(response.data.message || 'Token expired'))
+      authStore.logout(true)
+      return Promise.reject(new Error(response.data?.message || 'Token has expired.'))
     }
     return response
   },
   async (error) => {
+    const authStore = useAuthStore()
+    console.log('ERROR', error)
+
+    // 1. Standard HTTP 401 error response from server
     if (error.response?.status === 401) {
-      const authStore = useAuthStore()
       await authStore.logout()
+      const message = error.response?.data?.message || 'Token has expired.'
+      return Promise.reject(new Error(message))
     }
+
+    // 2. Handling errors where error.response is undefined (Network error / CORS / Dropped request)
+    if (!error.response) {
+      // Optional: auto-logout on network errors if unauthenticated
+      if (error.message?.includes('401')) {
+        await authStore.logout()
+      }
+      return Promise.reject(new Error(error.message || 'Network Error or Server Unreachable'))
+    }
+
     return Promise.reject(error)
   }
 )

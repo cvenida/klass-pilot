@@ -47,7 +47,7 @@ class ActivityService
     public function store($request)
     {
         $validator = Validator::make($request->all(), [
-            'learning_strand_id'                => 'required|exists:learning_strand,id',
+            'learning_strand_id'                => 'required|exists:learning_strands,id',
             'title'                             => 'required|string',
             'type'                              => 'required|in:quiz,assignment,exam,practice',
             'deadline'                          => 'nullable|date',

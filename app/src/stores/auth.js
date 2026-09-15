@@ -44,16 +44,14 @@ export const useAuthStore = defineStore('auth', {
       try {
         const { data } = await loginUser(credentials)
 
-        if (!data.status) {
-          throw new Error(data.message || 'Invalid credentials')
-        }
-
         this.setSession(data.data.user, data.data.access_token)
         await learningStrandStore.fetchLearningStrands()
         notify.success('Logged in successfully!')
 
+        // await router.push({ name: 'Welcome' })
         await router.push(data.data.user.type == USER_TYPE.TEACHER ? '/dashboard' : '/student/dashboard')
       } catch (err) {
+        notify.error('Logged in failed!')
         console.log(err)
       }
 
@@ -76,9 +74,11 @@ export const useAuthStore = defineStore('auth', {
       this.loading = false
     },
 
-    async logout() {
+    async logout(expiredToken = false) {
       const notify = useNotificationStore()
-      await logoutUser()
+      if (!expiredToken) {
+        await logoutUser()
+      }
 
       this.clearSession()
       notify.success('Logged out successfully!')

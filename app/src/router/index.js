@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import Login from '@/pages/LoginView.vue'
 import Register from '@/pages/RegisterView.vue'
+import WelcomeSplashView from '@/pages/WelcomeSplashView.vue'
 import Dashboard from '@/pages/teacher/DashboardView.vue'
 import Settings from '@/pages/SettingsView.vue'
 import StudentDashboard from '@/pages/student/DashboardView.vue'
@@ -57,6 +58,18 @@ const router = createRouter({
       name: 'settings',
       meta: { title: 'Settings', description: 'Manage your account preference, and security options.'},
       component: Settings,
+      beforeEnter: (to, from, next) => {
+        const authStore = useAuthStore()
+        if (!authStore.isAuthenticated) {
+          return next('/login')
+        }
+        next()
+      },
+    },
+    {
+      path: '/welcome',
+      name: 'Welcome',
+      component: WelcomeSplashView,
       beforeEnter: (to, from, next) => {
         const authStore = useAuthStore()
         if (!authStore.isAuthenticated) {

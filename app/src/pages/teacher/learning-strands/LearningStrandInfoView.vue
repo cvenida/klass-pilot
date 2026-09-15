@@ -168,15 +168,6 @@ const getStatusColor = (status) => {
               <div class="text-sm font-bold text-zinc-900 dark:text-zinc-100">{{ activity.score ?? 'N/A' }}</div>
             </div>
 
-            <v-chip
-              size="small"
-              :color="getStatusColor(activity.status)"
-              variant="tonal"
-              class="font-semibold capitalize shrink-0"
-            >
-              {{ activity.status }}
-            </v-chip>
-
             <v-btn
               variant="outlined"
               size="small"
