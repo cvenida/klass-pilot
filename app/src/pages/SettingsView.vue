@@ -44,18 +44,18 @@ const accountForm = ref({
   role: computed(() => authStore.currentUser?.role || authStore.currentUser?.type)
 })
 
+const formattedRole = computed({
+  get() {
+    if (!settings.value?.account?.role) return ''
+    return settings.value.account.role.charAt(0).toUpperCase() + settings.value.account.role.slice(1).toLowerCase()
+  },
+  set(newValue) {
+    settings.value.account.role = newValue
+  }
+})
+
 const settings = ref({
   account: accountForm,
-  notifications: {
-    emailDigest: true,
-    learningStrandSubmissions: true,
-    systemUpdates: false,
-    marketingEmails: false
-  },
-  security: {
-    twoFactor: false,
-    sessionTimeoutMinutes: 30
-  },
   appearance: {
     theme: 'system',
     denseMode: false
@@ -190,7 +190,7 @@ const handleLogout = () => {
           </div>
 
           <v-text-field
-            v-model="settings.account.role"
+            v-model="formattedRole"
             label="Role"
             variant="outlined"
             density="comfortable"
