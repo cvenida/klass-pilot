@@ -1,6 +1,6 @@
 <template>
   <v-app class="min-h-screen">
-    <NavBar v-if="authStore.isAuthenticated" />
+    <NavBar v-if="shouldShowNavBar" />
     <v-main>
       <router-view />
     </v-main>
@@ -8,12 +8,20 @@
 </template>
 
 <script lang="ts" setup>
+import { computed, onMounted } from 'vue'
+import { useRoute } from 'vue-router'
 import NavBar from '@/components/NavBar.vue'
 import { useAuthStore } from '@/stores/auth'
-import { onMounted } from 'vue'
 import { applyTheme } from '@/shared/constants'
 
 const authStore = useAuthStore()
+const route = useRoute()
+
+const excludedRoutes = ['/login', '/register', '/settings']
+
+const shouldShowNavBar = computed(() => {
+  return authStore.isAuthenticated && !excludedRoutes.includes(route.path)
+})
 
 onMounted(() => {
   const savedTheme = localStorage.getItem('user-theme') || 'system'
